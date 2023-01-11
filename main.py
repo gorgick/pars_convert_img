@@ -13,10 +13,11 @@ def get_html(url):
     print(r.status_code)
 
 
-def write_csv(data):
-    with open('OMA.csv', 'a') as f:
-        writer = csv.writer(f)
-        writer.writerow((data['way']))
+def download_picture(path, name):
+    r = requests.get(path, stream=True)
+    with open(name, 'bw') as f:
+        for chunk in r.iter_content(chunk_size=8192):
+            f.write(chunk)
 
 
 def get_page_data(html):
@@ -24,11 +25,14 @@ def get_page_data(html):
     data = soup.find('div', id="data-ga__catalog-products-grid").find_all('img')
     for el in data:
         src = el.get('data-src')
+        my_l = []
         if src is not None:
-            way = 'https://www.oma.by' + src
-            data = {'way': way}
-            print(data)
-            write_csv(data)
+            ways = 'https://www.oma.by' + src
+            my_l.append(ways)
+        for el in my_l:
+            if el != '':
+                name = el.split('/')[-1]
+                download_picture(el, name)
 
 
 def main():
